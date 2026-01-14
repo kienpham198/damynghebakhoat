@@ -4,6 +4,7 @@ export interface Product {
   title: string;
   desc: string;
   img: string;
+  images?: string[]; // Danh sách ảnh bổ sung cho sản phẩm
   price: string;
 }
 
@@ -21,6 +22,7 @@ export interface SiteContent {
   brandName: string;
   hotline: string;
   email: string;
+  googleSheetUrl: string;
   heroTagline: string;
   heroTitle: string;
   heroDescription: string;
