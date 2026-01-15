@@ -102,7 +102,6 @@ const App: React.FC = () => {
         }
 
         // 3. Kiểm tra URL bí mật để hiện khung đăng nhập
-        // Ví dụ: website.com/?admin=true hoặc website.com/?mode=admin
         const params = new URLSearchParams(window.location.search);
         if (params.get('admin') === 'true' || params.get('mode') === 'admin') {
           if (auth !== 'true') {
@@ -120,7 +119,6 @@ const App: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mật khẩu quản trị (Có thể thay đổi trong vite.config.ts hoặc tại đây)
     const adminPass = 'bakhoat123'; 
     if (passwordInput === adminPass) {
       setIsAdmin(true);
@@ -137,7 +135,6 @@ const App: React.FC = () => {
       setIsAdmin(false);
       setIsEditMode(false);
       localStorage.removeItem('bakhoat_admin_auth');
-      // Quay về trang chủ sạch sẽ
       window.location.href = window.location.pathname;
     }
   };
@@ -167,6 +164,41 @@ const App: React.FC = () => {
 
       return newContent;
     });
+  };
+
+  // Hàm xử lý khi người dùng chọn file để nhập dữ liệu
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        // Tìm phần JSON trong file .ts (nằm sau dấu bằng đầu tiên)
+        let jsonStr = text;
+        if (text.includes('export const initialContent')) {
+          const startIdx = text.indexOf('{');
+          const endIdx = text.lastIndexOf('}');
+          jsonStr = text.substring(startIdx, endIdx + 1);
+        }
+
+        const importedData = JSON.parse(jsonStr);
+        if (importedData && typeof importedData === 'object') {
+          await saveToDB(importedData);
+          setContent(importedData);
+          setHasChanges(true);
+          alert("Nhập dữ liệu THÀNH CÔNG! Trang web sẽ được cập nhật ngay.");
+          setShowExportModal(false);
+        }
+      } catch (err) {
+        console.error("Import error:", err);
+        alert("Lỗi: File không đúng định dạng. Vui lòng sử dụng file content.ts hoặc .json hợp lệ.");
+      }
+    };
+    reader.readAsText(file);
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = '';
   };
 
   const downloadFullCode = () => {
@@ -248,7 +280,7 @@ const App: React.FC = () => {
                     onClick={() => setShowExportModal(true)}
                     className="bg-amber-600 text-white px-6 py-2 rounded-full text-[10px] font-bold hover:bg-amber-500 shadow-xl flex items-center gap-2 border border-amber-500"
                   >
-                    <i className="fas fa-cloud-upload-alt"></i> XUẤT CODE LÊN VERCEL
+                    <i className="fas fa-sync-alt"></i> QUẢN LÝ DỮ LIỆU
                   </button>
                 </>
               )}
@@ -259,7 +291,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* --- MODAL ĐĂNG NHẬP (ẨN DƯỚI URL BÍ MẬT) --- */}
+        {/* --- MODAL ĐĂNG NHẬP --- */}
         {showLogin && (
           <div className="fixed inset-0 bg-stone-900/98 z-[300] flex items-center justify-center p-4 backdrop-blur-xl animate-fade-in">
             <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-stone-200">
@@ -286,31 +318,41 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* --- MODAL XUẤT DỮ LIỆU --- */}
+        {/* --- MODAL QUẢN LÝ DỮ LIỆU (XUẤT / NHẬP) --- */}
         {showExportModal && (
           <div className="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
             <div className="bg-white rounded-3xl max-w-2xl w-full p-10 shadow-2xl relative border border-stone-200">
               <button onClick={() => setShowExportModal(false)} className="absolute top-6 right-6 text-stone-400 hover:text-stone-900"><i className="fas fa-times text-xl"></i></button>
-              <h3 className="text-2xl font-serif font-bold text-stone-900 mb-8 uppercase text-center tracking-tight">Đồng bộ dữ liệu vĩnh viễn</h3>
-              <div className="bg-blue-50 p-6 rounded-2xl border-l-4 border-blue-500 mb-8 text-blue-900 text-xs leading-relaxed">
-                <p className="font-bold mb-2 uppercase">Lưu ý quan trọng:</p>
-                <p>Những gì bạn sửa đang được lưu tạm tại trình duyệt của bạn. Để khách hàng thấy được những thay đổi này, bạn cần:</p>
-                <ol className="list-decimal ml-4 mt-2 space-y-1">
-                  <li>Tải file <b>content.ts</b> bên dưới.</li>
-                  <li>Chép đè file này vào thư mục dự án trên máy tính.</li>
-                  <li><b>Push</b> lên GitHub để Vercel cập nhật website chính thức.</li>
-                </ol>
+              <h3 className="text-2xl font-serif font-bold text-stone-900 mb-8 uppercase text-center tracking-tight">Quản Lý Dữ Liệu Website</h3>
+              
+              <div className="bg-amber-50 p-5 rounded-2xl border-l-4 border-amber-500 mb-8 text-amber-900 text-xs leading-relaxed">
+                <p className="font-bold mb-2 uppercase">Hướng dẫn sử dụng:</p>
+                <ul className="list-disc ml-4 space-y-1">
+                  <li><b>Xuất dữ liệu:</b> Tải toàn bộ nội dung hiện tại về máy để lưu trữ hoặc gửi cho lập trình viên cập nhật lên Vercel.</li>
+                  <li><b>Nhập dữ liệu:</b> Chọn một file <i>content.ts</i> đã lưu từ trước để khôi phục nhanh website về trạng thái đó.</li>
+                </ul>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="p-8 border-2 border-amber-500 rounded-2xl bg-amber-50 cursor-pointer text-center group transition-all hover:shadow-xl" onClick={downloadFullCode}>
+                {/* CỘT XUẤT */}
+                <div className="p-8 border-2 border-stone-100 rounded-2xl bg-white cursor-pointer text-center group transition-all hover:border-amber-500 hover:shadow-xl" onClick={downloadFullCode}>
                   <div className="w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform"><i className="fas fa-file-download"></i></div>
-                  <h4 className="font-bold text-amber-900 text-xs uppercase mb-2">Tải file content.ts</h4>
-                  <p className="text-amber-700 text-[10px] uppercase font-bold tracking-tighter">Click để tải về ngay</p>
+                  <h4 className="font-bold text-stone-900 text-xs uppercase mb-2">1. Xuất file content.ts</h4>
+                  <p className="text-stone-500 text-[10px]">Lưu bản sao hiện tại về máy</p>
                 </div>
-                <div className="p-8 border border-stone-200 rounded-2xl cursor-default text-center bg-stone-50 opacity-60">
-                  <div className="w-12 h-12 bg-stone-200 text-stone-400 rounded-full flex items-center justify-center mx-auto mb-4"><i className="fas fa-sync"></i></div>
-                  <h4 className="font-bold text-stone-400 text-xs uppercase mb-2">Tự động hóa</h4>
-                  <p className="text-stone-400 text-[10px] uppercase">Tính năng đang phát triển</p>
+
+                {/* CỘT NHẬP */}
+                <div className="p-8 border-2 border-stone-100 rounded-2xl bg-white cursor-pointer text-center group transition-all hover:border-blue-500 hover:shadow-xl" onClick={() => fileInputRef.current?.click()}>
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform"><i className="fas fa-file-upload"></i></div>
+                  <h4 className="font-bold text-stone-900 text-xs uppercase mb-2">2. Nhập dữ liệu từ máy</h4>
+                  <p className="text-stone-500 text-[10px]">Khôi phục từ file đã lưu</p>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleImportFile} 
+                    className="hidden" 
+                    accept=".ts,.json" 
+                  />
                 </div>
               </div>
             </div>
