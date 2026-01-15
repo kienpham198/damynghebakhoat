@@ -1,7 +1,5 @@
 
-import { SiteContent } from './types';
-
-export const initialContent: SiteContent = {
+{
   "brandName": "Bá Khoát",
   "hotline": "0587.750.999",
   "email": "Bakhoat091929@gmail.com",
@@ -39,12 +37,6 @@ export const initialContent: SiteContent = {
       "title": "Mộ Đá Đơn",
       "desc": "Mẫu mộ đơn giản, uy nghiêm, bền bỉ cùng thời gian.",
       "img": "https://picsum.photos/id/101/600/400",
-      "images": [
-        "https://picsum.photos/id/101/800/600",
-        "https://picsum.photos/id/102/800/600",
-        "https://picsum.photos/id/103/800/600",
-        "https://picsum.photos/id/104/800/600"
-      ],
       "price": "Từ 15.000.000đ"
     },
     {
@@ -52,11 +44,6 @@ export const initialContent: SiteContent = {
       "title": "Lăng Thờ Đá",
       "desc": "Lăng thờ chung cho khuôn viên nghĩa trang gia đình.",
       "img": "https://picsum.photos/id/102/600/400",
-      "images": [
-        "https://picsum.photos/id/102/800/600",
-        "https://picsum.photos/id/105/800/600",
-        "https://picsum.photos/id/106/800/600"
-      ],
       "price": "Từ 45.000.000đ"
     },
     {
@@ -64,11 +51,6 @@ export const initialContent: SiteContent = {
       "title": "Cuốn Thư Đá",
       "desc": "Vật phẩm phong thủy chắn tà khí cho công trình.",
       "img": "https://picsum.photos/id/103/600/400",
-      "images": [
-        "https://picsum.photos/id/103/800/600",
-        "https://picsum.photos/id/107/800/600",
-        "https://picsum.photos/id/108/800/600"
-      ],
       "price": "Liên hệ"
     },
     {
@@ -76,10 +58,6 @@ export const initialContent: SiteContent = {
       "title": "Linh Vật Đá",
       "desc": "Rồng, nghê, voi đá chạm khắc tinh xảo.",
       "img": "https://picsum.photos/id/104/600/400",
-      "images": [
-        "https://picsum.photos/id/104/800/600",
-        "https://picsum.photos/id/109/800/600"
-      ],
       "price": "Liên hệ"
     },
     {
@@ -87,10 +65,6 @@ export const initialContent: SiteContent = {
       "title": "Cổng Đá",
       "desc": "Cổng đá cho từ đường, đình chùa, lăng mộ.",
       "img": "https://picsum.photos/id/111/600/400",
-      "images": [
-        "https://picsum.photos/id/111/800/600",
-        "https://picsum.photos/id/112/800/600"
-      ],
       "price": "Liên hệ"
     },
     {
@@ -98,11 +72,6 @@ export const initialContent: SiteContent = {
       "title": "Lầu Thờ Đá",
       "desc": "Kiến trúc lầu thờ đá tinh xảo, uy nghiêm cho các khu lăng mộ gia đình.",
       "img": "https://images.unsplash.com/photo-1590059390250-98843912660a?auto=format&fit=crop&q=80&w=600",
-      "images": [
-        "https://images.unsplash.com/photo-1590059390250-98843912660a?auto=format&fit=crop&q=80&w=800",
-        "https://picsum.photos/id/123/800/600",
-        "https://picsum.photos/id/124/800/600"
-      ],
       "price": "Liên hệ"
     }
   ],
@@ -114,4 +83,4 @@ export const initialContent: SiteContent = {
     "https://picsum.photos/id/19/600/600",
     "https://picsum.photos/id/20/600/600"
   ]
-};
+}
