@@ -175,8 +175,9 @@ const App: React.FC = () => {
     reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
-        // Tìm phần JSON trong file .ts (nằm sau dấu bằng đầu tiên)
         let jsonStr = text;
+
+        // Nếu là file .ts (có chứa export const initialContent)
         if (text.includes('export const initialContent')) {
           const startIdx = text.indexOf('{');
           const endIdx = text.lastIndexOf('}');
@@ -188,7 +189,9 @@ const App: React.FC = () => {
           await saveToDB(importedData);
           setContent(importedData);
           setHasChanges(true);
-          alert("Nhập dữ liệu THÀNH CÔNG! Trang web sẽ được cập nhật ngay.");
+          const now = new Date();
+          setLastSaved(`Nhập từ file lúc ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`);
+          alert("Nhập dữ liệu THÀNH CÔNG! Website đã được khôi phục từ file của bạn.");
           setShowExportModal(false);
         }
       } catch (err) {
@@ -197,7 +200,6 @@ const App: React.FC = () => {
       }
     };
     reader.readAsText(file);
-    // Reset input để có thể chọn lại cùng 1 file
     e.target.value = '';
   };
 
@@ -273,17 +275,18 @@ const App: React.FC = () => {
             </div>
             
             <div className="flex gap-4 items-center">
+              {/* Nút QUẢN LÝ DỮ LIỆU luôn hiện cho Admin */}
+              <button 
+                onClick={() => setShowExportModal(true)}
+                className="bg-amber-600 text-white px-6 py-2 rounded-full text-[10px] font-bold hover:bg-amber-500 shadow-xl flex items-center gap-2 border border-amber-500"
+              >
+                <i className="fas fa-sync-alt"></i> QUẢN LÝ DỮ LIỆU
+              </button>
+
               {isEditMode && (
-                <>
-                  <button onClick={resetToDefault} className="text-stone-600 hover:text-red-500 text-[10px] font-bold uppercase px-2">Xóa sửa đổi</button>
-                  <button 
-                    onClick={() => setShowExportModal(true)}
-                    className="bg-amber-600 text-white px-6 py-2 rounded-full text-[10px] font-bold hover:bg-amber-500 shadow-xl flex items-center gap-2 border border-amber-500"
-                  >
-                    <i className="fas fa-sync-alt"></i> QUẢN LÝ DỮ LIỆU
-                  </button>
-                </>
+                <button onClick={resetToDefault} className="text-stone-600 hover:text-red-500 text-[10px] font-bold uppercase px-2">Xóa sửa đổi</button>
               )}
+              
               <button onClick={handleLogout} className="w-10 h-10 bg-stone-900 text-stone-500 hover:text-white rounded-full transition-colors flex items-center justify-center" title="Đăng xuất Admin">
                 <i className="fas fa-sign-out-alt"></i>
               </button>
@@ -328,8 +331,8 @@ const App: React.FC = () => {
               <div className="bg-amber-50 p-5 rounded-2xl border-l-4 border-amber-500 mb-8 text-amber-900 text-xs leading-relaxed">
                 <p className="font-bold mb-2 uppercase">Hướng dẫn sử dụng:</p>
                 <ul className="list-disc ml-4 space-y-1">
-                  <li><b>Xuất dữ liệu:</b> Tải toàn bộ nội dung hiện tại về máy để lưu trữ hoặc gửi cho lập trình viên cập nhật lên Vercel.</li>
-                  <li><b>Nhập dữ liệu:</b> Chọn một file <i>content.ts</i> đã lưu từ trước để khôi phục nhanh website về trạng thái đó.</li>
+                  <li><b>Xuất dữ liệu:</b> Tải bản thảo hiện tại về máy tính để sao lưu hoặc gửi cho GitHub.</li>
+                  <li><b>Nhập dữ liệu:</b> Chọn file <i>content.ts</i> cũ từ máy bạn để nạp lại toàn bộ nội dung cho website này.</li>
                 </ul>
               </div>
 
@@ -338,14 +341,14 @@ const App: React.FC = () => {
                 <div className="p-8 border-2 border-stone-100 rounded-2xl bg-white cursor-pointer text-center group transition-all hover:border-amber-500 hover:shadow-xl" onClick={downloadFullCode}>
                   <div className="w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform"><i className="fas fa-file-download"></i></div>
                   <h4 className="font-bold text-stone-900 text-xs uppercase mb-2">1. Xuất file content.ts</h4>
-                  <p className="text-stone-500 text-[10px]">Lưu bản sao hiện tại về máy</p>
+                  <p className="text-stone-500 text-[10px]">Lưu bản thảo về máy</p>
                 </div>
 
                 {/* CỘT NHẬP */}
                 <div className="p-8 border-2 border-stone-100 rounded-2xl bg-white cursor-pointer text-center group transition-all hover:border-blue-500 hover:shadow-xl" onClick={() => fileInputRef.current?.click()}>
                   <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform"><i className="fas fa-file-upload"></i></div>
-                  <h4 className="font-bold text-stone-900 text-xs uppercase mb-2">2. Nhập dữ liệu từ máy</h4>
-                  <p className="text-stone-500 text-[10px]">Khôi phục từ file đã lưu</p>
+                  <h4 className="font-bold text-stone-900 text-xs uppercase mb-2">2. Nhập dữ liệu cũ</h4>
+                  <p className="text-stone-500 text-[10px]">Tải file từ máy lên trang này</p>
                   <input 
                     type="file" 
                     ref={fileInputRef} 
