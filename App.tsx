@@ -86,8 +86,7 @@ const App: React.FC = () => {
         if (saved) {
           setContent(saved);
           setHasChanges(true);
-          const now = new Date();
-          setLastSaved(`Đã tải bản lưu ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`);
+          setLastSaved(`Đã tải bản lưu ${new Date().toLocaleTimeString('vi-VN')}`);
         }
         const auth = localStorage.getItem('bakhoat_admin_auth');
         if (auth === 'true') setIsAdmin(true);
@@ -159,10 +158,10 @@ const App: React.FC = () => {
         await saveToDB(importedData);
         setContent(importedData);
         setHasChanges(true);
-        alert("Nhập dữ liệu thành công!");
+        alert("Khôi phục dữ liệu thành công! Website đã cập nhật theo file của bạn.");
         setShowExportModal(false);
       } catch (err) {
-        alert("File không đúng định dạng content.ts");
+        alert("Lỗi: File không đúng định dạng content.ts");
       }
     };
     reader.readAsText(file);
@@ -208,100 +207,124 @@ const App: React.FC = () => {
 
         {/* --- THANH ĐIỀU KHIỂN ADMIN --- */}
         {isAdmin && (
-          <div className="fixed bottom-0 left-0 right-0 bg-stone-900 border-t border-stone-800 p-4 z-[100] flex justify-between items-center px-8 shadow-2xl">
+          <div className="fixed bottom-0 left-0 right-0 bg-stone-950/95 border-t border-stone-800 p-4 z-[100] flex justify-between items-center px-8 shadow-2xl backdrop-blur-md">
             <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                 <span className="text-stone-500 text-[9px] font-bold uppercase tracking-widest">Chủ sở hữu</span>
+                 <div className="flex items-center gap-2">
+                   <div className={`w-2 h-2 rounded-full ${isEditMode ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`}></div>
+                   <span className="text-white text-[10px] font-bold uppercase">{isEditMode ? 'Chế độ sửa đang bật' : 'Chế độ xem trước'}</span>
+                 </div>
+              </div>
               <button 
                 onClick={() => setIsEditMode(!isEditMode)}
-                className={`px-6 py-2 rounded-full text-[10px] font-bold transition-all border-2 ${isEditMode ? 'bg-amber-600 border-amber-600 text-white' : 'bg-transparent border-stone-700 text-stone-400 hover:text-white'}`}
+                className={`px-6 py-2 rounded-full text-[10px] font-bold transition-all border-2 ${isEditMode ? 'bg-white border-white text-stone-900 shadow-xl' : 'bg-transparent border-stone-700 text-stone-400 hover:text-white'}`}
               >
-                {isEditMode ? 'XONG CHỈNH SỬA' : 'BẬT CHỈNH SỬA NHANH'}
+                {isEditMode ? 'HOÀN TẤT CHỈNH SỬA' : 'BẬT CHỈNH SỬA NHANH'}
               </button>
             </div>
             
             <div className="flex gap-4 items-center">
+              {/* NÚT MÀU CAM GIỐNG TRONG ẢNH */}
               <button 
                 onClick={() => setShowExportModal(true)}
-                className="bg-white text-stone-900 px-6 py-2 rounded-full text-[10px] font-bold hover:bg-amber-50 shadow-lg flex items-center gap-2"
+                className="bg-[#e67e22] text-white px-6 py-2 rounded-full text-[10px] font-bold hover:bg-[#d35400] shadow-lg flex items-center gap-2 border border-[#d35400]/20"
               >
                 <i className="fas fa-database"></i> QUẢN LÝ DỮ LIỆU
               </button>
-              <button onClick={handleLogout} className="text-stone-500 hover:text-red-500"><i className="fas fa-sign-out-alt"></i></button>
+              
+              <button onClick={handleLogout} className="w-10 h-10 bg-stone-900 text-stone-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors">
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
             </div>
           </div>
         )}
 
-        {/* --- MODAL ĐĂNG NHẬP --- */}
-        {showLogin && (
-          <div className="fixed inset-0 bg-stone-950/90 z-[300] flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl max-w-sm w-full p-8 shadow-2xl">
-              <h3 className="text-xl font-bold text-center mb-6 font-serif uppercase">Xác nhận Admin</h3>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input 
-                  type="password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Mật khẩu (bakhoat123)"
-                  className="w-full border p-3 rounded-lg text-center font-mono"
-                />
-                <button type="submit" className="w-full bg-stone-900 text-white py-3 rounded-lg font-bold">XÁC NHẬN</button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* --- MODAL QUẢN LÝ DỮ LIỆU (MỚI: CÓ THÊM GOOGLE SHEET) --- */}
+        {/* --- MODAL QUẢN LÝ DỮ LIỆU (ĐỒNG BỘ DỮ LIỆU) --- */}
         {showExportModal && (
-          <div className="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
-            <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-              <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-stone-400"><i className="fas fa-times"></i></button>
+          <div className="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-10 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+              <button onClick={() => setShowExportModal(false)} className="absolute top-6 right-6 text-stone-400 hover:text-stone-900 transition-colors">
+                <i className="fas fa-times text-xl"></i>
+              </button>
               
-              <h3 className="text-2xl font-serif font-bold text-stone-900 mb-6 text-center border-b pb-4">CẤU HÌNH HỆ THỐNG</h3>
+              <h3 className="text-2xl font-serif font-bold text-stone-900 mb-8 text-center uppercase tracking-tight">Quản Lý & Đồng Bộ Dữ Liệu</h3>
               
-              {/* PHẦN 1: GOOGLE SHEET */}
-              <div className="mb-8 p-6 bg-blue-50 rounded-xl border border-blue-100">
-                <h4 className="text-blue-900 font-bold text-xs uppercase mb-3 flex items-center gap-2">
-                  <i className="fas fa-table"></i> 1. Kết nối Google Sheet (Để nhận báo giá)
+              {/* PHẦN CẤU HÌNH GOOGLE SHEET */}
+              <div className="mb-10 p-6 bg-stone-50 rounded-2xl border border-stone-100 shadow-inner">
+                <h4 className="text-stone-900 font-bold text-xs uppercase mb-3 flex items-center gap-2">
+                  <i className="fas fa-link text-amber-600"></i> 1. Liên kết Google Trang Tính
                 </h4>
-                <p className="text-[10px] text-blue-700 mb-4 italic">
-                  Dán đường dẫn "Web App URL" từ Google App Script vào đây để khách hàng gửi form về Sheet của bạn.
+                <p className="text-[10px] text-stone-500 mb-4 leading-relaxed">
+                  Dán đường dẫn <b>"Web App URL"</b> từ Google App Script vào đây để thông tin khách hàng tự động gửi về trang tính của bạn.
                 </p>
                 <input 
                   type="text" 
                   placeholder="https://script.google.com/macros/s/..."
                   value={content.googleSheetUrl}
                   onChange={(e) => updateContent('googleSheetUrl', e.target.value)}
-                  className="w-full p-3 border border-blue-200 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+                  className="w-full p-4 border border-stone-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-amber-500 outline-none transition-all"
                 />
-                <div className="mt-2 text-[9px] text-blue-600 flex justify-between">
-                  <span>Trạng thái: {content.googleSheetUrl ? 'Đã kết nối' : 'Chưa có link'}</span>
-                  <span>Tự động lưu khi nhập</span>
+                <div className="mt-2 flex justify-between items-center">
+                   <span className="text-[9px] text-amber-700 font-bold uppercase tracking-widest">
+                     {content.googleSheetUrl ? '● Đã kết nối' : '○ Chưa có liên kết'}
+                   </span>
                 </div>
               </div>
 
-              {/* PHẦN 2: XUẤT / NHẬP DỮ LIỆU */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 border-2 border-dashed border-stone-200 rounded-xl text-center hover:border-amber-500 transition-colors cursor-pointer group" onClick={downloadFullCode}>
-                  <i className="fas fa-file-export text-3xl text-amber-600 mb-3 group-hover:scale-110 transition-transform"></i>
-                  <h5 className="font-bold text-xs uppercase mb-1">Xuất dữ liệu</h5>
-                  <p className="text-[10px] text-stone-400">Lưu file content.ts về máy</p>
+              {/* PHẦN XUẤT / NHẬP FILE */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-8 border-2 border-dashed border-stone-100 rounded-2xl text-center hover:border-amber-500 hover:bg-amber-50/30 transition-all cursor-pointer group" onClick={downloadFullCode}>
+                  <div className="w-14 h-14 bg-[#e67e22] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                    <i className="fas fa-file-download text-xl"></i>
+                  </div>
+                  <h5 className="font-bold text-stone-900 text-xs uppercase mb-2">Tải file content.ts</h5>
+                  <p className="text-[10px] text-stone-400">Lưu bản thảo hiện tại về máy tính</p>
                 </div>
 
-                <div className="p-6 border-2 border-dashed border-stone-200 rounded-xl text-center hover:border-blue-500 transition-colors cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
-                  <i className="fas fa-file-import text-3xl text-blue-600 mb-3 group-hover:scale-110 transition-transform"></i>
-                  <h5 className="font-bold text-xs uppercase mb-1">Nhập dữ liệu cũ</h5>
-                  <p className="text-[10px] text-stone-400">Tải file content.ts từ máy lên</p>
+                <div className="p-8 border-2 border-dashed border-stone-100 rounded-2xl text-center hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
+                  <div className="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                    <i className="fas fa-file-upload text-xl"></i>
+                  </div>
+                  <h5 className="font-bold text-stone-900 text-xs uppercase mb-2">Nhập dữ liệu cũ</h5>
+                  <p className="text-[10px] text-stone-400">Khôi phục nội dung từ file trên máy</p>
                   <input type="file" ref={fileInputRef} onChange={handleImportFile} className="hidden" accept=".ts,.json" />
                 </div>
               </div>
 
-              <div className="mt-8 text-center">
+              <div className="mt-12 pt-8 border-t border-stone-100 flex justify-center">
                 <button 
                   onClick={() => setShowExportModal(false)}
-                  className="bg-stone-900 text-white px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl"
+                  className="bg-stone-900 text-white px-10 py-3 rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-stone-800 transition-all shadow-xl"
                 >
-                  Đóng
+                  Hoàn tất cấu hình
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL ĐĂNG NHẬP (Giữ nguyên) */}
+        {showLogin && (
+          <div className="fixed inset-0 bg-stone-950/95 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-stone-900 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="fas fa-user-shield text-2xl"></i>
+                </div>
+                <h3 className="text-xl font-bold font-serif uppercase">Xác nhận Admin</h3>
+              </div>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input 
+                  autoFocus
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Nhập mật khẩu..."
+                  className="w-full border border-stone-200 p-4 rounded-xl text-center font-mono outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <button type="submit" className="w-full bg-stone-900 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg hover:bg-amber-600 transition-all">Xác nhận</button>
+              </form>
             </div>
           </div>
         )}
